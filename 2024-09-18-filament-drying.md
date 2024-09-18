@@ -61,6 +61,39 @@
 		* End
 	* Analysis
 		* Report average mass reading
+# COMMUNICATION PROTOCOL
+Case insensitive
+* Fan X Duty Cycle Y
+	* F X Y\n
+		* e.g. f1 255\n
+		* e.g. F2 57\n
+	* Response: OK\n
+* Heater X Duty Cycle Y
+	* H X Y\n
+		* e.g. H1 127\n
+		* e.g. h2 255\n
+	* Response: OK\n
+* Read Sensors, Interval X milliseconds
+	* R X\n
+		* e.g. R 1000\n
+		* e.g. r 10000\n
+	* Response (depends on number of sensors configured):
+		* Actual milliseconds in interval
+		* Actual sensor samples in interval
+		* For each sensor
+			* For each physical property measured
+				* min, max, avg, std dev
+		* Newline
+* Sensor Identification
+	* S\n
+	* Response (depends on number of sensors configured):
+		* Type
+		* Name of physical property measured
+		* Unit used for measurement
+* Error
+	* Response:
+		* E MESSAGE
+		* e.g. E Timeout
 # PARTS
 * I2C Breakout Board
 	* 2 X TCA9548A boards
