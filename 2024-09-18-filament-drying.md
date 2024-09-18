@@ -3,16 +3,66 @@
 	- But don't use Marlin firmware or GCode; custom firmware only
 - Build an I2C hub for all sensors, use connectors so sensors can be moved/replaced/etc
 - better to get a single, quality, US made differential pressure sensor, or multiple cheap chinese ones?
-- Keep things simple by not using active (e.g. PID) control of fans/heaters.
 # EXPERIMENTS
-* Dehydration
-* Hydration
-* Fan calibration (manual)
-* Mass flow calibration
-* Temperature calibration
-* Mass calibration (manual)
+* Dehydration (fan_power, heater_power, time)
+	* Execution
+		* Start
+		* Fan 1 Off, Fan 2 Off, Heater 1 Off, Heater 2  Off, equilibrate
+		* Fan 2 On (fan_power), equilibrate
+		* Heater 2 On (heater_power), equilibrate
+		* Wait (time)
+		* Heater 2 Off, equilibrate
+		* Fan 2 Off, equilibrate
+		* End
+	* Analysis
+		* TODO
+* Hydration (fan_power, heater_power, time)
+	* Execution
+		* Start
+		* Fan 1 Off, Fan 2 Off, Heater 1 Off, Heater 2  Off, equilibrate
+		* Fan 1 On (fan_power), equilibrate
+		* Heater 1 On (heater_power), equilibrate
+		* Wait (time)
+		* Heater 2 Off, equilibrate
+		* Fan 2 Off, equilibrate
+		* End
+	* Analysis
+		* TODO
+* Fan Calibration
+	* Execution
+		* Start
+		* Fan 1 Off, Fan 2 Off, Heater 1 Off, Heater 2  Off, equilibrate
+		* For each Fan 1,2
+			* For each Fan power 255 to 1
+				* Fan X on power Y, equilibrate
+				* Record mass flows
+			* Fan X Off, equilibrate
+		* End
+	* Analysis
+		* Table and chart of recorded values
+			* X axis = fan PWM duty cycle
+			* Y axis = recorded mass flow
+		* Equation of best fit curve and noted R
+* Temperature Calibration (manual)
+	* Execution
+		* Manually remove water container from Waterbath Chamber
+		* Start
+		* Fan 1 Off, Fan 2 Off, Heater 1 Off, Heater 2  Off, equilibrate
+		* Fan 1 On full, Fan 2 On full
+		* Equilibrate all temperature sensors except Room
+	* Analysis
+		* Calculate average reading across all temperature sensors, except Room
+		* Table of each sensor and the difference between its average reading and the global average
+* Mass Calibration (manual)
+	* Execution
+		* Manually put calibration weight on sensor
+		* Start
+		* Equilibrate mass sensor
+		* End
+	* Analysis
+		* Report average mass reading
 # PARTS
-* 2C Breakout Board
+* I2C Breakout Board
 	* 2 X TCA9548A boards
 	* 1 X proto board
 	* 16 X JST-XH2.54 4 Pin sockets
