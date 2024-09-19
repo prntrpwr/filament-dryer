@@ -8,7 +8,7 @@
 #define FAN_1_PIN 10
 #define FAN_2_PIN 9
 
-LiquidCrystal_I2C lcd(0x27,20,4);  // LCD I2C address is 0x27 and it is a 16x2 char display
+LiquidCrystal_I2C lcd(0x27,16,2);  // LCD I2C address is 0x27 and it is a 16x2 char display
 
 unsigned int led_on = 0;
 void led_blink() {
@@ -35,6 +35,7 @@ uint8_t fan_2_pwm_duty_cycle_255 = 0;
 uint8_t heater_2_pwm_duty_cycle_255 = 0;
 
 unsigned long last_interval_timestamp_millis = 0;
+String display_text = "";
 void lcd_display() {
   lcd.clear();
 
@@ -49,9 +50,11 @@ void lcd_display() {
   lcd.print("2F");
   lcd.print(fan_2_pwm_duty_cycle_255);
 
-  lcd.setCursor(5,1);
-  lcd.print("1H");
-  lcd.print(0);
+  lcd.setCursor(0,1);
+  lcd.print(display_text.substring(0, 10));
+  // lcd.setCursor(5,1);
+  // lcd.print("1H");
+  // lcd.print(0);
   lcd.setCursor(11,1);
   lcd.print("2H");
   lcd.print(heater_2_pwm_duty_cycle_255);
@@ -107,6 +110,10 @@ void process_command_line(String serial_in) {
         start_measurement_interval(first_int);
       } else if (command=='s' || command == 'S') {
         describe_sensors();
+      } else if (command=='d' || command=='D') {
+        display_text = serial_in.substring(first_space+1);
+        display_text.trim();
+        Serial.println("OK");
       } else {
         Serial.println("E Unparseable command");
       }

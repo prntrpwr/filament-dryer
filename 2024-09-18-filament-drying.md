@@ -94,6 +94,9 @@ Case insensitive
 	* Response:
 		* E MESSAGE
 		* e.g. E Timeout
+* Display Information
+	* D XXXX\n
+	* Response: OK\n
 # PARTS
 * I2C Breakout Board
 	* 2 X TCA9548A boards
