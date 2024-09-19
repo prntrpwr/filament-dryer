@@ -85,17 +85,22 @@ void set_heater(int heater_num, int heater_duty_cycle) {
 }
 
 void start_measurement_interval(int interval_duration_ms) {
-  Serial.print("Starting measurement interval duration ");
+  Serial.print("OK,Starting measurement interval duration ");
   Serial.print(interval_duration_ms);
   Serial.println();
 }
 
 void describe_sensors() {
-  Serial.print("Describing sensors");
+  Serial.print("OK,Describing sensors");
   Serial.println();
 }
 
 void process_command_line(String serial_in) {
+      serial_in.trim();
+      if (serial_in.length()==0) {
+        Serial.println("OK");
+        return;
+      }
       char command = serial_in.charAt(0);
       int first_space = serial_in.indexOf(' ');
       int second_space = serial_in.indexOf(' ', first_space+1);
@@ -115,7 +120,9 @@ void process_command_line(String serial_in) {
         display_text.trim();
         Serial.println("OK");
       } else {
-        Serial.println("E Unparseable command");
+        Serial.print("E Unparseable command \"");
+        Serial.print(serial_in);
+        Serial.println("\"");
       }
 }
 
