@@ -1,20 +1,23 @@
 import serial
 import time
 
+interval_duration = 10
+
 def serial_start():
     global s
     s = serial.Serial('COM6', 115200, dsrdtr=True)
-    response = ""
-    while response != b"OK":
+    response = b""
+    while not response.startswith(b"OK"):
         time.sleep(0.1)
         s.write(b"\n")
         response = s.readline().strip()
-        #print(response)
+        print(response)
 
 def serial_end():
     s.close()
 
 def serial_cmd(cmd):
+    #print(cmd)
     s.write( (cmd + "\n").encode())
     response = s.readline().strip()
     response = response.decode()
@@ -25,10 +28,10 @@ def serial_cmd(cmd):
 
 def equilibrate():
     # TODO
+    time.sleep(2*interval_duration)
     time.sleep(1)
 
 def record_sensors():
-    interval_duration = 10000
     interval_start = round(time.time())
     sensor_readings = serial_cmd(f"R {interval_duration}")
     interval_end = round(time.time())
@@ -40,12 +43,12 @@ def everything_off():
     serial_cmd("H 2 0")
     equilibrate()
 
-def test_fan_step():
+def test_fan_step_pwm_pressure(step_size):
     serial_start()
-    serial_cmd("D fan_step")
+    serial_cmd("D fansteppwm")
     everything_off()
 
-    for fan_pwm in range(255,-1, -1):
+    for fan_pwm in list(range(25,255, 1*step_size)) + list(range(255,25, -1*step_size)):
         serial_cmd(f"F 1 {fan_pwm}")
         serial_cmd(f"F 2 {fan_pwm}")
         equilibrate()
@@ -81,4 +84,4 @@ def test_hot_step():
 
     serial_end()
 
-test_fan_step()
+test_fan_step_pwm_pressure(5)
