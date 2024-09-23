@@ -1,3 +1,6 @@
+# python3 -u src/filament-dryer-controller.py | tee 2024-09-23-test_fan_step_pwm_pressure-1.log
+
+
 import serial
 import time
 
@@ -5,11 +8,15 @@ interval_duration = 10
 
 def serial_start():
     global s
-    s = serial.Serial('COM6', 115200, dsrdtr=True)
+    s = serial.Serial('/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_55431313238351E06131-if00', 115200, dsrdtr=True)
+    # device sometimes reboots when serial port connects, wait for it
+    time.sleep(5)
+    s.read_all()  
+    
+    s.write(b"\n")
     response = b""
     while not response.startswith(b"OK"):
         time.sleep(0.1)
-        s.write(b"\n")
         response = s.readline().strip()
         print(response)
 
@@ -17,13 +24,13 @@ def serial_end():
     s.close()
 
 def serial_cmd(cmd):
-    #print(cmd)
+    print(cmd)
     s.write( (cmd + "\n").encode())
     response = s.readline().strip()
     response = response.decode()
     if not response.startswith("OK"):
         raise RuntimeError("Command failed: " + response.decode("utf-8"))
-    #print(response)
+    print(response)
     return response
 
 def is_number(s):
@@ -69,20 +76,26 @@ def everything_off():
     serial_cmd("H 2 0")
     equilibrate()
 
+def list_pwm_up_down(fan_pwm, step_size):
+    pwm_list = list(range(fan_pwm,255, 1*step_size))
+    midpoint_between_last_two = round((pwm_list[-1] + pwm_list[-2])/2)
+    pwm_list += list(range(midpoint_between_last_two,fan_pwm, -1*step_size))
+    print(pwm_list)
+    return pwm_list
+
 def test_fan_step_pwm_pressure(step_size):
     serial_start()
     serial_cmd("D fansteppwm")
     everything_off()
 
-    for fan_pwm in list(range(25,255, 1*step_size)) + list(range(255,25, -1*step_size)):
+    for fan_pwm in list_pwm_up_down(125, 2):
         serial_cmd(f"F 1 {fan_pwm}")
         serial_cmd(f"F 2 {fan_pwm}")
-        equilibrate()
+        equilibrate(min_s=10,max_s=20)
         record_sensors()
 
     serial_cmd("D Complete")
     everything_off()
-
     serial_end()
 
 def test_hot_step():
@@ -115,24 +128,19 @@ def test_hot_fan_step(step_size=25, heater_pwm=15, start_fan_pwm=125):
     serial_cmd("D hotfanstep")
     everything_off()
 
-    fan_pwm_list = list(range(start_fan_pwm,255, 1*step_size))
-    midpoint_between_last_two = round((fan_pwm_list[-1] + fan_pwm_list[-2])/2)
-    fan_pwm_list += list(range(midpoint_between_last_two,start_fan_pwm, -1*step_size))
-    print(fan_pwm_list)
-
     serial_cmd("F 1 255")
     serial_cmd("F 2 255")
     equilibrate(min_s=600,max_s=900)
     record_sensors()
 
-    for fan_pwm in fan_pwm_list:
+    for fan_pwm in list_pwm_up_down(start_fan_pwm, step_size):
         serial_cmd(f"F 1 {fan_pwm}")
         serial_cmd("F 2 255")
         serial_cmd(f"H 2 {heater_pwm}")
         equilibrate(min_s=600,max_s=900)
         record_sensors()
 
-    for fan_pwm in fan_pwm_list:
+    for fan_pwm in list_pwm_up_down(start_fan_pwm, step_size):
         serial_cmd("F 1 255")
         serial_cmd(f"F 2 {fan_pwm}")
         serial_cmd(f"H 2 {heater_pwm}")
@@ -150,4 +158,5 @@ def test_hot_fan_step(step_size=25, heater_pwm=15, start_fan_pwm=125):
 
     serial_end()
 
-test_hot_fan_step(step_size=50, heater_pwm=15, start_fan_pwm=100) # 2024-09-20
+#test_hot_fan_step(step_size=50, heater_pwm=15, start_fan_pwm=100) # 2024-09-20
+test_fan_step_pwm_pressure(2) # 2024-09-23
