@@ -1,3 +1,11 @@
+/*
+
+
+/home/pi/.platformio/penv/bin/platformio run --target upload
+
+*/
+
+
 #include <Arduino.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -150,11 +158,19 @@ void set_fan(int fan_num, int fan_duty_cycle) {
   if (fan_num==1) {
     fan_1_pwm_duty_cycle_255 = fan_duty_cycle;
     analogWrite(FAN_1_PIN, fan_1_pwm_duty_cycle_255);
-    Serial.println("OK");
+    Serial.print("OK F ");
+    Serial.print(fan_num);
+    Serial.print(" ");
+    Serial.print(fan_duty_cycle);
+    Serial.println();
   } else if (fan_num==2) {
     fan_2_pwm_duty_cycle_255 = fan_duty_cycle;
     analogWrite(FAN_2_PIN, fan_2_pwm_duty_cycle_255);
-    Serial.println("OK");
+    Serial.print("OK F ");
+    Serial.print(fan_num);
+    Serial.print(" ");
+    Serial.print(fan_duty_cycle);
+    Serial.println();
   } else {
     Serial.println("E Invalid fan number");
   }
@@ -164,7 +180,11 @@ void set_heater(int heater_num, int heater_duty_cycle) {
   if (heater_num==2) {
     heater_2_pwm_duty_cycle_255 = heater_duty_cycle;
     analogWrite(HEATER_2_PIN, heater_2_pwm_duty_cycle_255);
-    Serial.println("OK");
+    Serial.print("OK H ");
+    Serial.print(heater_num);
+    Serial.print(" ");
+    Serial.print(heater_duty_cycle);
+    Serial.println();
   } else {
     Serial.println("E Invalid heater number");
   }
@@ -176,7 +196,8 @@ void start_measurement_interval(unsigned int interval_duration_s) {
     read_sensors();
   }
   unsigned long interval_end_timestamp_millis = millis();
-  Serial.print("OK");
+  Serial.print("OK R ");
+  Serial.print(interval_duration_s);
   Serial.print(",");
   data_print(interval_start_timestamp_millis, interval_end_timestamp_millis);
   Serial.println();
@@ -192,7 +213,8 @@ void describe_sensors() {
 void process_command_line(String serial_in) {
       serial_in.trim();
       if (serial_in.length()==0) {
-        Serial.print("OK");
+        Serial.print("OK status ");
+        Serial.print(serial_in);
         Serial.print(",");
         Serial.print(fan_1_pwm_duty_cycle_255);
         Serial.print(",");
@@ -219,7 +241,9 @@ void process_command_line(String serial_in) {
       } else if (command=='d' || command=='D') {
         display_text = serial_in.substring(first_space+1);
         display_text.trim();
-        Serial.println("OK");
+        Serial.print("OK D ");
+        Serial.print(display_text);
+        Serial.println();
       } else {
         Serial.print("E Unparseable command \"");
         Serial.print(serial_in);
@@ -236,6 +260,8 @@ void loop() {
     if (c=='\n') { 
       process_command_line(serial_in);
       serial_in = "";
+    } else if (c=='\r') {
+      // ignore
     } else {
       if (serial_in.length() > COMMAND_LINE_MAX_LENGTH_CHARS) {
         Serial.println("E Command line length limit exceeded");
