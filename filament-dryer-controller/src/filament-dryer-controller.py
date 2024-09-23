@@ -78,6 +78,8 @@ def everything_off():
 
 def list_pwm_up_down(fan_pwm, step_size):
     pwm_list = list(range(fan_pwm,255, 1*step_size))
+    if 255 not in pwm_list:
+        pwm_list.append(255)
     midpoint_between_last_two = round((pwm_list[-1] + pwm_list[-2])/2)
     pwm_list += list(range(midpoint_between_last_two,fan_pwm, -1*step_size))
     print(pwm_list)
