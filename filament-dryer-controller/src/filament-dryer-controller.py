@@ -64,11 +64,14 @@ def equilibrate(min_s=10, max_s=60, interval_s=10, min_drift=0.999):
         sensor_readings = serial_cmd(f"R {interval_s}").split(",")
         #print(sensor_readings)
 
+sensor_data = []
 def record_sensors():
     interval_start = round(time.time())
     sensor_readings = serial_cmd(f"R {interval_duration}")
     interval_end = round(time.time())
-    print(f"{interval_start},{interval_end},{sensor_readings}")
+    record = f"{interval_start},{interval_end},{sensor_readings}"
+    print(record)
+    sensor_data.append(record);
 
 def everything_off():
     serial_cmd("F 1 0")
@@ -162,3 +165,6 @@ def test_hot_fan_step(step_size=25, heater_pwm=15, start_fan_pwm=125):
 
 #test_hot_fan_step(step_size=50, heater_pwm=15, start_fan_pwm=100) # 2024-09-20
 test_fan_step_pwm_pressure(2) # 2024-09-23
+
+for datum in sensor_data:
+    print(datum)
