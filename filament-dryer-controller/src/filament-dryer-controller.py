@@ -3,25 +3,16 @@
 
 import serial
 import time
+import argparse
 
 interval_duration = 10
 
-def serial_start():
-    global s
-    s = serial.Serial('/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_55431313238351E06131-if00', 115200, dsrdtr=True)
-    # device sometimes reboots when serial port connects, wait for it
-    time.sleep(5)
-    s.read_all()  
-    
-    s.write(b"\n")
-    response = b""
-    while not response.startswith(b"OK"):
-        time.sleep(0.1)
-        response = s.readline().strip()
-        print(response)
+parser = argparse.ArgumentParser(prog='Filament Dryer Controller')
+parser.add_argument('-d', '--data-file', default="filament-dryer-controller-data.csv")
+parser.add_argument('-p', '--serial-port', default="COM6")
+args = parser.parse_args()
 
-def serial_end():
-    s.close()
+csv = None
 
 def serial_cmd(cmd):
     print(cmd)
@@ -32,6 +23,31 @@ def serial_cmd(cmd):
         raise RuntimeError("Command failed: " + response.decode("utf-8"))
     print(response)
     return response
+
+def serial_start():
+    global s, csv
+    s = serial.Serial(args.serial_port, 115200, dsrdtr=True)
+    # device sometimes reboots when serial port connects, wait for it
+    time.sleep(5)
+    s.read_all()  
+    
+    s.write(b"\n")
+    response = b""
+    while not response.startswith(b"OK"):
+        time.sleep(0.1)
+        response = s.readline().strip()
+        print(response)
+    csv = open(args.data_file, "a")
+    header_rows = serial_cmd("S")
+    header_rows = header_rows.split(",")[2:]
+    header = f"HOST_INTERVAL_START,HOST_INTERVAL_END,{','.join(header_rows)}"
+    print(header)
+    print(header, file=csv)
+    csv.flush()
+
+def serial_end():
+    s.close()
+
 
 def is_number(s):
     try:
@@ -64,14 +80,14 @@ def equilibrate(min_s=10, max_s=60, interval_s=10, min_drift=0.999):
         sensor_readings = serial_cmd(f"R {interval_s}").split(",")
         #print(sensor_readings)
 
-sensor_data = []
 def record_sensors():
     interval_start = round(time.time())
     sensor_readings = serial_cmd(f"R {interval_duration}")
     interval_end = round(time.time())
     record = f"{interval_start},{interval_end},{sensor_readings}"
     print(record)
-    sensor_data.append(record);
+    print(record, file=csv)
+    csv.flush()
 
 def everything_off():
     serial_cmd("F 1 0")
@@ -171,6 +187,3 @@ def test_hot_fan_step(step_size=25, heater_pwm=15, start_fan_pwm=125):
 
 #test_hot_fan_step(step_size=50, heater_pwm=15, start_fan_pwm=100) # 2024-09-20
 test_fan_step_pwm_pressure(2) # 2024-09-23
-
-for datum in sensor_data:
-    print(datum)

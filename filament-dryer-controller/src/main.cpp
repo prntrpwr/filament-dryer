@@ -96,6 +96,35 @@ void read_sensors() {
   }
   sensor_data_point_count++;
 }
+void describe_sensors() {
+  Serial.print("OK,S");
+  Serial.print(",");
+  Serial.print("INTERVAL_STATUS");
+  Serial.print(",");
+  Serial.print("INTERVAL_NUM");
+  Serial.print(",");
+  Serial.print("INTERVAL_START");
+  Serial.print(",");
+  Serial.print("INTERVAL_DURATION");
+  Serial.print(",");
+  Serial.print("INTERVAL_DATA_POINTS");
+  Serial.print(",");
+  Serial.print("FAN0");
+  Serial.print(",");
+  Serial.print("FAN1");
+  Serial.print(",");
+  Serial.print("HEATER1");
+
+  for (int i=0; i<NUM_SENSORS; i++) {
+    Serial.print(",EMPTY,");
+    Serial.print("SENS"); Serial.print(i); Serial.print("_TEMP");
+    Serial.print(",");
+    Serial.print("SENS"); Serial.print(i); Serial.print("_PRESS");
+    Serial.print(",");
+    Serial.print("SENS"); Serial.print(i); Serial.print("_HUM");
+    }
+  Serial.println();
+}
 
 unsigned long data_print_count = 0;
 void data_print(unsigned long interval_start_timestamp_millis, unsigned long interval_end_timestamp_millis) {
@@ -203,11 +232,6 @@ void start_measurement_interval(unsigned int interval_duration_s) {
   Serial.println();
 
   data_reset();
-}
-
-void describe_sensors() {
-  Serial.print("OK,Describing sensors");
-  Serial.println();
 }
 
 void process_command_line(String serial_in) {
