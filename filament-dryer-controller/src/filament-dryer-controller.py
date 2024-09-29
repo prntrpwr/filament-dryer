@@ -64,6 +64,7 @@ def values_within(readingsa, readingsb, allowed_diff):
         if not is_number(readingsa[i]): continue
         a = float(readingsa[i])
         b = float(readingsb[i])
+        if a==0 and b==0 : continue
         diff = min(a, b) / max(a, b)
         if (diff < allowed_diff) :
             #print(a,b,diff)
