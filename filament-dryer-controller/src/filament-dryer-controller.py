@@ -113,7 +113,7 @@ def test_fan_step_pwm_pressure(step_size):
     equilibrate(min_s=20,max_s=40)
     record_sensors()
 
-    for fan_pwm in list_pwm_up_down(25, 2):
+    for fan_pwm in list_pwm_up_down(25, step_size):
         serial_cmd(f"F 1 {fan_pwm}")
         serial_cmd(f"F 2 {fan_pwm}")
         equilibrate(min_s=20,max_s=40)
